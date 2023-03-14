@@ -29,18 +29,30 @@ function onFormElInput(event) {
 function generatePromises(initialDelay, delayStep, promisesAmount) {
   let delay = initialDelay;
   for (let i = 1; i <= promisesAmount; i++) {
-    setTimeout(() => {
-      createPromise(i, delay);
-    }, delay);
+    createPromise(i, delay)
+      .then(value => {
+        Notify.info(
+          `✅ Fulfilled promise ${value.position} in ${value.delay}ms`
+        );
+      })
+      .catch(value => {
+        Notify.failure(
+          `❌ Rejected promise ${value.position} in ${value.delay}ms`
+        );
+      });
     delay += delayStep;
   }
 }
 
 function createPromise(position, delay) {
   const shouldResolve = Math.random() > 0.3;
-  if (shouldResolve) {
-    Notify.info(`✅ Fulfilled promise ${position} in ${delay}ms`);
-  } else {
-    Notify.failure(`❌ Rejected promise ${position} in ${delay}ms`);
-  }
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (shouldResolve) {
+        resolve({ position, delay });
+      } else {
+        reject({ position, delay });
+      }
+    }, delay);
+  });
 }
